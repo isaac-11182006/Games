@@ -38,7 +38,6 @@ public class SpyFallConnection {
 	
     private volatile String nickname;
     private Session session;
-    private int voteCount = 0;
     
     private static final String GET_PLAYERS = "-players";
     private static final String START_GAME = "-start";
