@@ -11,7 +11,7 @@ Chat.socket = null;
 var chatHistory = [];
 var chatHistoryCursor;
 
-var popSrc = "../sounds/pop.mp3";
+var popSrc = "../sounds/notification/pop.mp3";
 
 Chat.connect = (function(host) {
 	if ('WebSocket' in window) {
