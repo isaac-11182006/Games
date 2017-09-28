@@ -6,7 +6,7 @@ package com.ivant.spyfall.enums;
  */
 
 public enum Emoji {
-	GUN("-gun", "<i class=\"em em-gun\"/><audio src=\"../sounds/gunshot.mp3\" autoplay=\"true\" />");
+	GUN("-gun", "<i class=\"em em-gun\"/><audio src=\"../sounds/emoji/gunshot.mp3\" autoplay=\"true\" />");
 
 	public String code;
 	public String htmlCode;
