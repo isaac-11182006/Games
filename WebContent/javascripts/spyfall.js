@@ -24,7 +24,7 @@ Chat.connect = (function(host) {
 	}
 
 	Chat.socket.onopen = function() {
-		Console.log('Info: WebSocket connection opened.');
+		//Console.log('Info: WebSocket connection opened.');
 		document.getElementById('chat').onkeydown = function(event) {
 			if (event.keyCode == 13) {
 				Chat.sendMessage();
@@ -75,11 +75,15 @@ Chat.initialize = function() {
 	}
 };
 
+function addChatHistory(message){
+	chatHistory.push(message);
+	chatHistoryCursor = chatHistory.length - 1;
+}
+
 Chat.sendMessage = (function() {
 	var message = document.getElementById('chat').value;
 	if (message != '') {
-		chatHistory.push(message);
-		chatHistoryCursor = chatHistory.length - 1;
+		addChatHistory(message);
 		if (message == 'cls') {
 			clear();
 		} else {
@@ -127,7 +131,7 @@ function initGame() {
 function initGameEmojis() {
 	var emojis = document.getElementById("game-emojis");
 	emojis.appendChild(createActionImage("../css/emoji/gun.png",
-			"Chat.socket.send('-gun');", "-gun", 20, 20));
+			"Chat.socket.send('-gun');addChatHistory('-gun');", "-gun", 20, 20));
 }
 
 var soundOptions = [
@@ -200,6 +204,7 @@ function createActionImage(src, onclickFunction, title, width, height) {
 
 function changeTextColor(color){
 	Chat.socket.send("-chcolor " + color);
+	addChatHistory("-chcolor " + color);
 }
 
 function changeChatSound(sound){
@@ -208,6 +213,7 @@ function changeChatSound(sound){
 
 function startGame() {
 	Chat.socket.send("-start");
+	addChatHistory("-start");
 }
 
 function clear() {
@@ -217,6 +223,7 @@ function clear() {
 
 function showPlayers() {
 	Chat.socket.send("-players");
+	addChatHistory("-players");
 }
 
 function setLocations() {
