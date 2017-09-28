@@ -26,7 +26,7 @@ function notify(message, defaultTitle) {
 	if(!isSoundPlaying && !visible()){
 		isSoundPlaying = true;
 		var pop = document.createElement("audio");
-		pop.setAttribute("src", "../sounds/pop2.mp3");
+		pop.setAttribute("src", "../sounds/pop.mp3");
 		pop.play();
 		pop.onended = function() {
 			isSoundPlaying = false;

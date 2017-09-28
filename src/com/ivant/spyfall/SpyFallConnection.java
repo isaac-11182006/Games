@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.websocket.OnClose;
@@ -15,6 +14,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.ivant.spyfall.enums.Emoji;
 import com.ivant.util.HTMLFilter;
 
 /**
@@ -32,8 +32,8 @@ import com.ivant.util.HTMLFilter;
 @ServerEndpoint(value = "/spyfall/{name}")
 public class SpyFallConnection {
 
-	private static final String GUEST_PREFIX = "Guest";
-    private static final AtomicInteger connectionIds = new AtomicInteger(0);
+	//private static final String GUEST_PREFIX = "Guest";
+    //private static final AtomicInteger connectionIds = new AtomicInteger(0);
     private static final Set<SpyFallConnection> connections =
             new HashSet<SpyFallConnection>();
     
@@ -72,7 +72,7 @@ public class SpyFallConnection {
     	};
 
     public SpyFallConnection() {
-    	nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+    	//nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
     }
     
     @OnOpen
@@ -87,6 +87,7 @@ public class SpyFallConnection {
 			String message = String.format("* %s %s", nickname, "already in use.");
 			try {
 				this.session.getBasicRemote().sendText(message);
+				this.session.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -117,11 +118,11 @@ public class SpyFallConnection {
     @OnMessage
     public void incoming(String message) {
     	String m = HTMLFilter.filter(message.toString());
+    	
     	if (START_GAME.equals(m)) {
 			if (connections.size() >= MIN_PLAYERS) {
     			int spy = getSpy();
         		int location = getLocation();
-//        		System.out.println("spy: " + spy + " | location: " + location);
         		startGame(spy, location);
         		return;
     		}else{
@@ -150,15 +151,29 @@ public class SpyFallConnection {
 	    		return;
     		}
     	}
+    	
         // Never trust the client
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
-		if (this.color != null) {
-			broadcast("<span style='color:" + this.color + "'>" + filteredMessage + "</span>");
-		} else {
-			broadcast(filteredMessage);
+        
+		broadcast(proccessMessage(filteredMessage));       
+    }
+    
+    private String proccessMessage(String message){
+    	String styledText = "";
+    	//check if theres emoji
+		for (Emoji emoji : Emoji.values()) {
+			if(message.contains(emoji.code)){
+				message = message.replaceAll(emoji.code, emoji.htmlCode);
+			}
 		}
-       
+    	
+    	if (this.color != null) {
+    		styledText = "<span style='color:" + this.color + "'>" + message + "</span>";
+    	}else{
+    		styledText = message;
+    	}
+    	return styledText;
     }
 
     @OnError
