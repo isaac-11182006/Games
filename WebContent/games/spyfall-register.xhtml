@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>SpyFall</title>
+<script type="application/javascript"><![CDATA[
+	function submit(){
+		var name = document.getElementById("name").value;
+		if(name.trim() != ""){
+			window.location = '/Games/games/spyfall.xhtml?'+name;
+		}else{
+			alert("Name is required!");
+		}
+	}
+	]]>
+</script>
+</head>
+<body>
+	
+	Enter nickname : <input id="name" type="text" value=""/>
+	<input type="button" value="Submit" onclick="submit()"/>
+	
+</body>
+</html>

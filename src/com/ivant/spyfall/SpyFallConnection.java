@@ -1,6 +1,7 @@
 package com.ivant.spyfall;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -34,13 +35,18 @@ public class SpyFallConnection {
 	private static final String GUEST_PREFIX = "Guest";
     private static final AtomicInteger connectionIds = new AtomicInteger(0);
     private static final Set<SpyFallConnection> connections =
-            new CopyOnWriteArraySet<SpyFallConnection>();
+            new HashSet<SpyFallConnection>();
+    
+    private static final Set<SpyFallConnection> spectators =
+            new HashSet<SpyFallConnection>();
+	
 	
     private volatile String nickname;
     private Session session;
     
     private static final String GET_PLAYERS = "-players";
     private static final String START_GAME = "-start";
+    private static final String SET_SPECTATOR = "-spectator ";
     private static final int MIN_PLAYERS = 3;
     
     private static final String[] LOCATIONS = {
@@ -95,6 +101,15 @@ public class SpyFallConnection {
     	}else{
     		System.out.println("Connection not valid");
     	}
+    	
+    	if(spectators.contains(this)){
+    		spectators.remove(this);
+  	        String message = String.format("* %s %s",
+  	                nickname, "has disconnected.");
+  	        broadcast(message);
+	  	}else{
+	  		System.out.println("Connection not valid");
+	  	}
     }
 
     @OnMessage
@@ -117,6 +132,14 @@ public class SpyFallConnection {
     	if (GET_PLAYERS.equals(m)) {
     		message = "Current online: " + getPlayers();
     	}
+    	if (m != null && m.startsWith(SET_SPECTATOR)) {
+    		SpyFallConnection s = findByName(m.replace(SET_SPECTATOR, ""));
+    		if (s != null) {
+	    		addToSpectator(s);
+	    		removeClient(s);
+	    		return;
+    		}
+    	}
         // Never trust the client
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
@@ -136,7 +159,22 @@ public class SpyFallConnection {
     			}
     		}
     	}
+    	for (SpyFallConnection client : spectators) {
+    		synchronized (client) {
+    			if (client.nickname.equalsIgnoreCase(name)) {
+    				return client;
+    			}
+    		}
+    	}
     	return null;
+    }
+    
+    private void removeClient(SpyFallConnection client) {
+    	connections.remove(client);
+    }
+    
+    private void addToSpectator(SpyFallConnection client) {
+    	spectators.add(client);
     }
 
     private static void broadcast(String msg) {
@@ -156,6 +194,28 @@ public class SpyFallConnection {
                 String message = String.format("* %s %s",
                         client.nickname, "has been disconnected.");
                 broadcast(message);
+            }
+        }
+        broadcastToExpectators(msg);
+    }
+
+    private static void broadcastToExpectators(String msg) {
+        for (SpyFallConnection client : spectators) {
+            try {
+                synchronized (client) {
+                    client.session.getBasicRemote().sendText(msg);
+                }
+            } catch (IOException e) {
+                System.out.println("Chat Error: Failed to send message to client:\n" + e.getMessage());
+                spectators.remove(client);
+                try {
+                    client.session.close();
+                } catch (IOException e1) {
+                    // Ignore
+                }
+                String message = String.format("* %s %s",
+                        client.nickname, "has been disconnected.");
+                broadcastToExpectators(message);
             }
         }
     }
@@ -189,22 +249,29 @@ public class SpyFallConnection {
     		boolean sentToSpy = false;
     		int locationSentCount = 0;
     		String finalMessage = "";
+    		
+    		String spyName = "";
+    		
     		for (SpyFallConnection client : connections) {
     			synchronized (client) {
     				if (clientIndex == spy) {
     					client.session.getBasicRemote().sendText(gameStart + "You are the SPY... :)");
+    					spyName = client.nickname;
     					sentToSpy = true;
     				} else {
-    					client.session.getBasicRemote().sendText(gameStart + "Secret location: " + LOCATIONS[location]);
+    					client.session.getBasicRemote().sendText(gameStart + "Secret location: <b>" + LOCATIONS[location] +"</b>");
     					locationSentCount++;
     				}
     				clientIndex++;
                 }
     		}
+    		
     		if (sentToSpy) {
     			finalMessage = finalMessage + "One of you is the SPY.<br />";
     		}
     		finalMessage = finalMessage + "The Secret Location was sent to " + locationSentCount + " players.";
+    		broadcastToExpectators(gameStart + "Spy : <b>" + spyName + "</b>"
+					+ "<br />Secret location: <b>" + LOCATIONS[location] + "</b>");
     		broadcast(finalMessage);
     		
     	} catch(Exception e) {

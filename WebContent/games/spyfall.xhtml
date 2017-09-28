@@ -102,11 +102,15 @@
         });
 
         Chat.initialize = function() {
-            if (window.location.protocol == 'http:') {
-                Chat.connect('ws://' + window.location.host + '/BG/spyfall/' + name);
-            } else {
-                Chat.connect('wss://' + window.location.host + '/BG/spyfall/' + name);
-            }
+        	if(name == 'undefined'){
+        		window.location = '/Games/games/spyfall-register.xhtml';
+        	}else{
+        		if (window.location.protocol == 'http:') {
+                	Chat.connect('ws://' + window.location.host + '/Games/spyfall/' + name);
+	            } else {
+	                Chat.connect('wss://' + window.location.host + '/Games/spyfall/' + name);
+	            }
+        	}
         };
 
         Chat.sendMessage = (function() {
@@ -150,8 +154,6 @@
 			var console = document.getElementById('console');
 			console.innerHTML = "";
 		}
-		
-		
     		
     	function setLocations() {
     		var locations = [
