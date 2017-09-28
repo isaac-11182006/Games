@@ -43,10 +43,12 @@ public class SpyFallConnection {
 	
     private volatile String nickname;
     private Session session;
+    private String color;
     
     private static final String GET_PLAYERS = "-players";
     private static final String START_GAME = "-start";
     private static final String SET_SPECTATOR = "-spectator ";
+    private static final String SET_COLOR = "-chcolor ";
     private static final int MIN_PLAYERS = 3;
     
     private static final String[] LOCATIONS = {
@@ -140,10 +142,23 @@ public class SpyFallConnection {
 	    		return;
     		}
     	}
+    	
+    	if (m != null && m.startsWith(SET_COLOR)) {
+    		String color = HTMLFilter.filter(m.replace(SET_COLOR, ""));
+    		if (color != null) {
+    			this.color = color;
+	    		return;
+    		}
+    	}
         // Never trust the client
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
-    	broadcast(filteredMessage);
+		if (this.color != null) {
+			broadcast("<span style='color:" + this.color + "'>" + filteredMessage + "</span>");
+		} else {
+			broadcast(filteredMessage);
+		}
+       
     }
 
     @OnError
@@ -180,9 +195,9 @@ public class SpyFallConnection {
     private static void broadcast(String msg) {
         for (SpyFallConnection client : connections) {
             try {
-                synchronized (client) {
-                    client.session.getBasicRemote().sendText(msg);
-                }
+				synchronized (client) {
+					client.session.getBasicRemote().sendText(msg);
+				}
             } catch (IOException e) {
                 System.out.println("Chat Error: Failed to send message to client:\n" + e.getMessage());
                 connections.remove(client);

@@ -1,6 +1,7 @@
 var nofityTimer = null;
 var isTitleShowing = true;
 var isAnimating = false;
+var isSoundPlaying = false;
 
 var visible = (function(){
 	 	var stateKey, eventKey, keys = {
@@ -22,9 +23,19 @@ var visible = (function(){
 })();
 
 function notify(message, defaultTitle) {
+	if(!isSoundPlaying && !visible()){
+		isSoundPlaying = true;
+		var pop = document.createElement("audio");
+		pop.setAttribute("src", "../sounds/pop2.mp3");
+		pop.play();
+		pop.onended = function() {
+			isSoundPlaying = false;
+		};
+	}
+	
 	if(!isAnimating){
 		isAnimating = true;
-		pulsateTitle(message, defaultTitle)
+		pulsateTitle(message, defaultTitle);
 	}
 }
 function pulsateTitle(message, defaultTitle) {
@@ -41,12 +52,11 @@ function pulsateTitle(message, defaultTitle) {
 		if (isTitleShowing) {
 			isTitleShowing = false;
 			document.title = message;
-			console.log(message);
 		} else {
 			isTitleShowing = true;
 			document.title = defaultTitle;
-			console.log(defaultTitle);
 		}
+		
 	}
 
 }
