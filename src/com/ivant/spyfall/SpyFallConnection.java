@@ -21,7 +21,7 @@ import com.ivant.util.HTMLFilter;
  */
 
 /**
- * @author Anthony Joseph Gal
+ * @author anthony
  *
  * @version 1.0 Sep 27, 2017
  * @since 1.0 Sep 27, 2017
