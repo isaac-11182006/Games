@@ -22,11 +22,11 @@ var visible = (function(){
     }
 })();
 
-function notify(message, defaultTitle) {
+function notify(message, defaultTitle, popSrc) {
 	if(!isSoundPlaying && !visible()){
 		isSoundPlaying = true;
 		var pop = document.createElement("audio");
-		pop.setAttribute("src", "../sounds/pop.mp3");
+		pop.setAttribute("src", popSrc);
 		pop.play();
 		pop.onended = function() {
 			isSoundPlaying = false;
