@@ -136,7 +136,8 @@ function initGameEmojis() {
 
 var soundOptions = [
     {"label":"pop.mp3", "value":"../sounds/notification/pop.mp3"}, 
-    {"label":"pop1.mp3", "value":"../sounds/notification/pop1.mp3"}];
+    {"label":"pop1.mp3", "value":"../sounds/notification/pop1.mp3"},
+    {"label":"pop2.mp3", "value":"../sounds/notification/pop2.mp3"}];
 
 function initGameSettings() {
 	var settings = document.getElementById("game-settings");
