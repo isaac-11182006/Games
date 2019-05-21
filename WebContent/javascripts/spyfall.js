@@ -84,8 +84,8 @@ Chat.sendMessage = (function() {
 	var message = document.getElementById('chat').value;
 	if (message != '') {
 		addChatHistory(message);
-		if (message == 'cls') {
-			clear();
+		if (message == '-cls') {
+			clearChat();
 		} else {
 			Chat.socket.send(message);
 		}
@@ -150,7 +150,7 @@ function initGameSettings() {
 function initGameButtons() {
 	var menu = document.getElementById("game-buttons");
 	menu.appendChild(createButtonInput("Start Game", "startGame()", "-start"));
-	menu.appendChild(createButtonInput("Clear", "clear()", "-cls"));
+	menu.appendChild(createButtonInput("Clear", "clearChat()", "-cls"));
 	menu.appendChild(createButtonInput("Show Online Players", "showPlayers()",
 			"-players"));
 }
@@ -217,7 +217,7 @@ function startGame() {
 	addChatHistory("-start");
 }
 
-function clear() {
+function clearChat() {
 	var console = document.getElementById('console');
 	console.innerHTML = "";
 }
